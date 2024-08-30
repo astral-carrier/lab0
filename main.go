@@ -1,10 +1,12 @@
 package main
 
+/*
 import (
 	"fmt"
 	"main/handlers"
 	"net/http"
 )
+*/
 
 func main() {
 	// TODO: some code goes here
