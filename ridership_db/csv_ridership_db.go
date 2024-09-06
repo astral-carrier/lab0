@@ -3,8 +3,9 @@ package ridershipDB
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
-
+	"strconv"
 )
 
 type CsvRidershipDB struct {
@@ -37,3 +38,41 @@ func (c *CsvRidershipDB) Open(filePath string) error {
 
 // TODO: some code goes here
 // Implement the remaining RidershipDB methods
+
+func (c *CsvRidershipDB) GetRidership(lineId string) ([]int64, error) {
+	periodsToRidership := make(map[string]int64)
+
+	for {
+		row, readError := c.csvReader.Read()
+
+		if readError == io.EOF {
+			break
+		} else if readError != nil {
+			return nil, readError
+		}
+
+		if row[0] == lineId {
+			rowRidership, conversionError := strconv.Atoi(row[4])
+
+			if conversionError != nil {
+				return nil, conversionError
+			}
+
+			periodsToRidership[row[2]] += int64(rowRidership)
+		}
+	}
+
+	ridershipArray := make([]int64, 0)
+
+	for i := 1; i <= c.num_intervals; i++ {
+		timePeriodID := fmt.Sprintf("time_period_%02d", i)
+
+		ridershipArray = append(ridershipArray, periodsToRidership[timePeriodID])
+	}
+
+	return ridershipArray, nil
+}
+
+func (c *CsvRidershipDB) Close() error {
+	return c.csvFile.Close()
+}
